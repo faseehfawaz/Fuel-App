@@ -1,0 +1,128 @@
+import pandas as pd
+
+def get_monthly_data():
+    data = {
+        'January': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'February': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'March': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'April': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'May': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'June': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'July': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'August': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'September': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'October': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'November': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0},
+        'December': {'fuel_cost': 0, 'km_run': 0, 'fuel_used_liters': 0}
+    }
+    return data
+
+def display_menu():
+    print("\nMenu:")
+    print("1. Add data for a month")
+    print("2. Calculate total cost and fuel economy")
+    print("3. View data")
+    print("4. Exit")
+
+def display_month_menu():
+    print("\nSelect Month:")
+    print("1. January")
+    print("2. February")
+    print("3. March")
+    print("4. April")
+    print("5. May")
+    print("6. June")
+    print("7. July")
+    print("8. August")
+    print("9. September")
+    print("10. October")
+    print("11. November")
+    print("12. December")
+
+def add_data(data, last_mileage):
+    display_month_menu()
+    month_choice = input("Enter the month number: ")
+    months = [
+        'January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ]
+    
+    if month_choice.isdigit() and 1 <= int(month_choice) <= 12:
+        month = months[int(month_choice) - 1]
+        fuel_cost = float(input("Enter fuel cost: "))
+        fuel_used_liters = float(input("Enter fuel used (liters): "))
+        total_mileage = float(input("Enter car's total mileage: "))
+        
+        if total_mileage >= last_mileage:
+            km_run = total_mileage - last_mileage
+            last_mileage = total_mileage
+        else:
+            print("Invalid mileage. Total mileage should be greater than or equal to the last mileage.")
+            return
+        
+        data[month]['fuel_cost'] += fuel_cost
+        data[month]['km_run'] += km_run
+        data[month]['fuel_used_liters'] += fuel_used_liters
+        print(f"Data for {month} updated successfully.")
+    else:
+        print("Invalid choice. Please try again.")
+    
+    return last_mileage
+
+def calculate_fuel_economy(data):
+    # Create DataFrame
+    df = pd.DataFrame(data).T
+
+    # Calculate fuel economy (kmpl) for each month
+    df['fuel_economy_kmpl'] = df['km_run'] / df['fuel_used_liters']
+
+    # Calculate total values
+    total_fuel_cost = df['fuel_cost'].sum()
+    total_km_run = df['km_run'].sum()
+    total_fuel_used = df['fuel_used_liters'].sum()
+    
+    # Calculate total fuel economy
+    if total_fuel_used != 0:
+        total_fuel_economy = total_km_run / total_fuel_used
+    else:
+        total_fuel_economy = 0
+
+    # Add total row
+    total_row = pd.DataFrame({
+        'fuel_cost': [total_fuel_cost],
+        'km_run': [total_km_run],
+        'fuel_used_liters': [total_fuel_used],
+        'fuel_economy_kmpl': [total_fuel_economy]
+    }, index=['Total'])
+
+    df = pd.concat([df, total_row])
+
+    return df, total_fuel_economy
+
+def view_data(data):
+    df, total_fuel_economy = calculate_fuel_economy(data)
+    print(df)
+    print(f"\nTotal Fuel Economy for the year: {total_fuel_economy:.2f} kmpl")
+
+def main():
+    data = get_monthly_data()
+    initial_mileage = float(input("Enter the car's current mileage: "))
+    last_mileage = initial_mileage
+    while True:
+        display_menu()
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            last_mileage = add_data(data, last_mileage)
+        elif choice == '2':
+            view_data(data)
+        elif choice == '3':
+            view_data(data)
+        elif choice == '4':
+            print("Exiting program.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
